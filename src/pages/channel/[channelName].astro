@@ -1,0 +1,16 @@
+---
+import Call from "../../components/Call.tsx";
+
+const { channelName } = Astro.params;
+---
+
+<div class="static m-0 p-0">
+    <p class="absolute z-10 mt-2 ml-12 text-2xl font-bold text-gray-900">
+        {channelName!}
+    </p>
+    <Call
+        client:only="react"
+        channelName={channelName!}
+        appId={import.meta.env.PUBLIC_AGORA_APP_ID}
+    />
+</div>
