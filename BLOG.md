@@ -1,16 +1,16 @@
 # Build a Video Call with Astro
 
-A framework called Astro is gaining popularity, and so I decided to learn web development to give it a shot. I built a couple of sites with it, and then I thought: "I wonder if you can build video call apps with Astro." 
+Astro is a framework that renders static HTML to your website with no JavaScript unless you explicitly ask for it and it is gaining popularity fast. I wonder if you can add video calls to your Astro website?
 
-The answer is yes! This article will teach you exactly how you can do it too.
+The answer is yes! This article will teach you exactly how you can do it.
 
 
 ## What We Will Use
 Of course, we need Astro, since it is the title of this article. 
 
-The second part of the title is about video calls. For that, we will use Agora. Specifically, we will use the `agora-react-uikit` package. This package is a React wrapper for the [Agora UI Kit](https://docs.agora.io/en/video-calling/get-started/get-started-uikit?platform=web), which is a set of UI components that make it easy to build a video call app. 
+The second part of the title is about video calls. For that, we will use Agora. Specifically, we will use the `agora-rtc-react` package. This package is a React SDK for interfacing with [Agora](https://docs.agora.io/en/video-calling/get-started/get-started-sdk?platform=react-js).
 
-Currently, there is no native Astro package. But given that we can use almost any popular web framework in an Astro application, the `agora-react-uikit` will work just fine.
+Currently, there is no native Astro package. But Astro was built specifically to be used with almost any popular web framework. So the `agora-rtc-react` will work just fine.
 
 We will also use Tailwind CSS to do some minor styling of the application.
 
@@ -25,7 +25,7 @@ Retrieve the App ID, which we’ll use to authorize the app requests as we devel
 1. Create your Astro project using `npm create astro@latest`. 
 2. Add Tailwind CSS using `npx astro add tailwind`.
 3. Add React using `npx astro add react`.
-4. Add the Agora UI Kit using `npm install agora-react-uikit`.
+4. Add the Agora UI Kit using `npm install agora-rtc-react`.
 5. Add `PUBLIC_AGORA_APP_ID = '<---Your App Id--->'` to your `.env` file.
 
 ## Structure of the Project 
@@ -122,7 +122,7 @@ if (Astro.request.method === "POST") {
 ```
 
 ## Call Page
-Other than the call component that will be provided by the `agora-react-uikit`, the call page will be simple. We want to print out the name of the channel we have joined.
+With in the call component that we will build with the `agora-rtc-react`, we want to print out the name of the channel we have joined.
 
 The redirect we used in the previous section is dynamic, and it will be different depending on the channelName we entered. To handle this in Astro, we need to create a `channel` folder and in the folder define a file named `[channelName].astro`. The square brackets signify that the dynamic `${channelName}` in our URL will be passed as a parameter in this component. We just need to retrieve it and display it in our UI.
 
@@ -153,49 +153,90 @@ const { channelName } = Astro.params;
 ```
 
 ## Add Call Component
-This last component is a pure React component. We have a state variable `activeCall` that we will use to toggle between the video call screen when `true` and a rejoin and back button when `false`. 
+This last component is a pure React component. The call component will contain three key components:
+* Videos of all the participants
+* Channel name
+* End call button
 
-To use the Agora UI Kit, we need to pass `rtcProps` containing the App ID and the channel name, in addition to the callbacks. In this case, we define only the `EndCall` callback, which will change the `activeCall` to `false`:
+The channel name is simple a text at the top left of the screen and the call button is at the middle bottom of the screen. Whenever you click the button, it will take you back to the previous screen where you can join a different video call.
+
+The interesting part is displaying the videos of all the participants. In order to do that we need to create an `AgoraRTCProvider`, which initializes and gives us access to the Agora RTC service. Inside this we can now display the video.
+
+### Videos
+The videos component is where all will be the part of the site that displays the videos of all the participants. There are many hooks used to set up the call:
+* useLocalMicrophoneTrack() retrieves the current user's microphone
+* useLocalCameraTrack() retrieves the current user's video input
+* useRemoteUsers() retrieves all the user information for the remote users
+* useRemoteAudioTracks() retrieves the audio for those users.
+* usePublish() publishes the current user's video and audio
+* useJoin() joins the actual channel for the video call
 
 ```tsx
-import AgoraUIKit from 'agora-react-uikit';
-import { useState } from 'react';
+const { AppID, channelName } = props;
+const { isLoading: isLoadingMic, localMicrophoneTrack } = useLocalMicrophoneTrack();
+const { isLoading: isLoadingCam, localCameraTrack } = useLocalCameraTrack();
+const remoteUsers  = useRemoteUsers();
+const { audioTracks } = useRemoteAudioTracks(remoteUsers);
 
-interface AppInfo {
-  channelName: string;   
-  appId: string;
+usePublish([localMicrophoneTrack, localCameraTrack]);
+useJoin({
+	appid: AppID,
+	channel: channelName,
+	token:  null ,
+});
+```
+
+Then we need to make sure all the audio for the remote users is started.
+
+```tsx
+audioTracks.map((track) => track.play());
+```
+
+And lastly we need to define our UI. First a loading state, while we wait for the local user's microphone and video to begin, and then a grid of all the users that are in the call.
+
+```tsx
+const deviceLoading = isLoadingMic || isLoadingCam;
+if (deviceLoading) return <div className="flex flex-col items-center pt-40">Loading devices...</div>;
+
+const numUsers = remoteUsers.length + 1; 
+let numCols = 1;
+let numRows = 1;
+switch (numUsers) {
+case 1:
+	numCols = 1;
+	numRows = 1;
+	break;
+case 2:
+	numCols = 2;
+	numRows = 1;
+	break;
+case 3:
+	numCols = 3;
+	numRows = 1;
+	break;
+case 4:
+	numCols = 2;
+	numRows = 2;
+	break;
+default:
+	break;
 }
 
-const Call = (props:AppInfo) => {
-  const [activeCall, setActiveCall] = useState(true);
-  const rtcProps = {
-    appId: props.appId, // enter your agora appid here
-    channel: props.channelName, // your agora channel
-  };
-  const callbacks = {
-    EndCall: () => setActiveCall(false),
-  };
-
-  
-  return activeCall ? (
-    <div style={{display: 'flex', width: '100vw', height: '100vh'}}>
-   
-      <AgoraUIKit rtcProps={rtcProps} callbacks={callbacks} /> 
-    </div>
-  ) : (
-    <div className='ml-12 flex flex-col'>
-      <div className='pt-10'></div>
-      <button className="px-5 py-3 mt-5 text-base font-medium text-center text-white bg-gray-400 rounded-lg hover:bg-gray-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 w-40" onClick={() => setActiveCall(true)}>Rejoin Call</button>
-      <a className=" px-5 py-3 mt-5 text-base font-medium text-center text-white bg-blue-400 rounded-lg hover:bg-blue-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 w-40" href='/'>Back</a>
-    </div>
-  );
-};
-
-export default Call;
+return (
+<div className="flex flex-col justify-between w-full h-screen p-1">
+	<div className={`grid grid-cols-${numCols} grid-rows-${numRows} gap-1 flex-1`}>
+	<LocalVideoTrack track={localCameraTrack} play={true} className="w-full h-full" />
+	{remoteUsers.map((user) => (
+		<RemoteUser user={user} />
+	))}
+	
+	</div>
+</div>
+);
 ```
 
 Our final video call should look like this:
-![Video Call](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/y07njiqoasenpg2ztgcf.png)
+![Video Call](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/toidmib42ycml33600i6.png)
 
 
 
@@ -203,11 +244,11 @@ Our final video call should look like this:
 With that, we have a complete video call experience. Here's how we built it:
 
 1. Create our Astro project.
-2. Install Tailwind CSS, React, and the Agora UI Kit.
+2. Install Tailwind CSS, React, and the Agora SDK.
 3. Create a form to input the channel name.
 4. Redirect the site to a URL with the channel name.
 5. Display the channel name with a video call.
 
-The code for this project can be found [here](https://github.com/tadaspetra/agora/tree/main/astrovideocall). And you can find out more about Agora video calling [here](https://docs.agora.io/en/video-calling/get-started/get-started-uikit?platform=web).
+The code for this project can be found [here](https://github.com/tadaspetra/astro-video-call). And you can find out more about Agora video calling [here](https://docs.agora.io/en/video-calling/get-started/get-started-uikit?platform=reactjs).
 
 Thank you for reading!
