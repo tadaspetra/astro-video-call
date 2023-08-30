@@ -23,8 +23,8 @@ Retrieve the App ID, which we’ll use to authorize the app requests as we devel
 
 ## Initialize the Astro Project
 1. Create your Astro project using `npm create astro@latest`. 
-2. Add Tailwind CSS using `npx astro add tailwind`.
-3. Add React using `npx astro add react`.
+2. Add Tailwind CSS using `npm astro add tailwind`.
+3. Add React using `npm astro add react`.
 4. Add the Agora UI Kit using `npm install agora-rtc-react`.
 5. Add `PUBLIC_AGORA_APP_ID = '<---Your App Id--->'` to your `.env` file.
 
