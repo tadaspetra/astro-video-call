@@ -1,31 +1,31 @@
 # Build a Video Call with Astro
 
-Astro is a framework that renders static HTML to your website with no JavaScript unless you explicitly ask for it and it is gaining popularity fast. I wonder if you can add video calls to your Astro website?
+Astro is a framework that renders static HTML to your website with no JavaScript unless you explicitly ask for it-and it is gaining popularity fast. But can you add video calls to your Astro website?
 
-The answer is yes! This article will teach you exactly how you can do it.
+The answer is yes! This article will teach you exactly how to do it.
 
 
 ## What We Will Use
-Of course, we need Astro, since it is the title of this article. 
+Of course, we need the Astro framework, since it is the title of this article. 
 
-The second part of the title is about video calls. For that, we will use Agora. Specifically, we will use the `agora-rtc-react` package. This package is a React SDK for interfacing with [Agora](https://docs.agora.io/en/video-calling/get-started/get-started-sdk?platform=react-js).
+We will use Agora for the video call portion of the app. Specifically, we will use the `agora-rtc-react` package. This package is a React SDK for interfacing with [Agora](https://docs.agora.io/en/video-calling/get-started/get-started-sdk?platform=react-js).
 
-Currently, there is no native Astro package. But Astro was built specifically to be used with almost any popular web framework. So the `agora-rtc-react` will work just fine.
+Currently, there is no native Astro package. But Astro was built to be used with almost any popular web framework. So the `agora-rtc-react` package will work just fine.
 
-We will also use Tailwind CSS to do some minor styling of the application.
+We will use Tailwind CSS for minor styling of the application.
 
 ## Create an Agora Account
-[Sign up](https://sso2.agora.io/en/v6/signup) for an Agora account and log in to the dashboard.
+[Sign up](https://sso2.agora.io/en/v6/signup) for an Agora account, and log in to the dashboard.
 
-Navigate to the Project List tab under the Project Management tab, and create a project by clicking the blue Create button.
+Navigate to the Project List tab under the Project Management tab. Create a project by clicking the blue Create button.
 
 Retrieve the App ID, which we’ll use to authorize the app requests as we develop the application.
 
 ## Initialize the Astro Project
-1. Create your Astro project using `npm create astro@latest`. 
-2. Add Tailwind CSS using `npm astro add tailwind`.
-3. Add React using `npm astro add react`.
-4. Add the Agora UI Kit using `npm install agora-rtc-react`.
+1. Create your Astro project by using `npm create astro@latest`. 
+2. Add Tailwind CSS by using `npm astro add tailwind`.
+3. Add React by using `npm astro add react`.
+4. Add the Agora UI Kit by using `npm install agora-rtc-react`.
 5. Add `PUBLIC_AGORA_APP_ID = '<---Your App Id--->'` to your `.env` file.
 
 ## Structure of the Project 
@@ -50,14 +50,14 @@ Retrieve the App ID, which we’ll use to authorize the app requests as we devel
 ## Building a Form with Astro
 
 ### Astro SSG vs SSR
-By default Astro projects use a static site generator (SSG) that creates a static site which you cannot change. Astro provides a way to interface with different frameworks (React, Svelte, Vue, etc.) using a mechanism called islands. Forms need to be interactive, and we could definitely use an island to get this done. However it is possible to create a form with Astro that ships with zero JavaScript.
+By default, Astro projects use a static site generator (SSG) that creates a static site which you cannot change. Astro provides a way to interface with various frameworks (React, Svelte, Vue, etc.) using a mechanism called islands. Forms need to be interactive, and we could use an island to get this done. However, you can create a form with Astro that ships with zero JavaScript.
 
 To do that, we need to enable the server-side renderer (SSR) by adding `output: 'server'` to the `astro.config.mjs` file. This means that our pages will get rendered on the server. This brings the benefits of being able to access server-side data and to run some functions before the page loads. 
 
 ### Form UI
-For the case of creating and submitting a form, we will load the page initially to show the form. Then whenever we submit the form, it will act much like an API endpoint. 
+For the case of creating and submitting a form, we will load the page initially to display the form. Then whenever we submit the form, it will act much like an API endpoint. 
 
-Normally, when you submit a form the data will be added to the URL, and you would have to parse it out. By changing the form's data transfer method to POST, it will send the form data as part of the `Request` body. For this application the only data we need is the name of the channel the user is trying to join:
+Normally, when you submit a form the data is added to the URL, and you would have to parse it out. By changing the form's data transfer method to POST, it will send the form data as part of the `Request` body. For this application, the only data we need is the name of the channel the user is trying to join:
 
 ```html
 <div class="flex flex-col items-center">
@@ -102,8 +102,8 @@ Our form should look like this:
 ![Enter Channel](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/a1d4dmnspwms1g0f3sym.png)
 
 
-## Retrieve Form Data and Redirect to Call Page
-Once the form is submitted with the data in the `Request`, the page will be reloaded and the data will be sent to the server. This data can be retrieved server-side and acted on before the page is displayed. In this case, we will check for errors. If we find any, we will render the same page again to show the user the error. If there is no error, we will redirect the user to the page associated with the video call channel they entered:
+## Retrieve Form Data and Redirect to the Call Page
+Once the form is submitted with the data in the `Request`, the page is reloaded and the data is sent to the server. This data can be retrieved server-side and acted on before the page is displayed. In this case, we will check for errors. If we find any, we will render the same page again to show the user the error. If there is no error, we will redirect the user to the page associated with the video call channel they entered:
 
 ```ts
 let error: String = "";
@@ -122,16 +122,16 @@ if (Astro.request.method === "POST") {
 ```
 
 ## Call Page
-With in the call component that we will build with the `agora-rtc-react`, we want to print out the name of the channel we have joined.
+In the Call component that we will build with the `agora-rtc-react`, we want to print the name of the channel we have joined.
 
-The redirect we used in the previous section is dynamic, and it will be different depending on the channelName we entered. To handle this in Astro, we need to create a `channel` folder and in the folder define a file named `[channelName].astro`. The square brackets signify that the dynamic `${channelName}` in our URL will be passed as a parameter in this component. We just need to retrieve it and display it in our UI.
+The redirect we used in the previous section is dynamic, and it will be different depending on the channelName we entered. To handle this in Astro, we need to create a `channel` folder and in the folder define a file named `[channelName].astro`. The square brackets signify that the dynamic `${channelName}` in our URL will be passed as a parameter in this component. We just need to retrieve the channel name and display it in our UI.
 
 ### `client:only` directive
-For our Call component we pass the `channelName` and `appId`. But we also need to add a `client:only="react"` directive. This directive is needed for creating an Astro island. As mentioned, Astro is generating static HTML code for the site, and the video call that we create needs to be interactive. 
+For our Call component we pass the `channelName` and the `appId`. But we also need to add a `client:only="react"` directive. This directive is needed for creating an Astro island. As mentioned, Astro generates static HTML code for the site, and the video call that we create needs to be interactive. 
 
-So without this directive Astro will try to render static HTML from this React component. However by using `client:only` we skip the server-side rendering, and just let React do what React wants to do: render only on the client. 
+So without this directive Astro will try to render static HTML from this React component. However, by using `client:only` we skip the server-side rendering, and just let React do what React wants to do: render only on the client. 
 
-Since Astro supports many frameworks we also need to specify which framework it needs to us:
+Since Astro supports many frameworks we also need to specify which framework it needs to use:
 
 ```astro
 ---
@@ -152,24 +152,24 @@ const { channelName } = Astro.params;
 </div>
 ```
 
-## Add Call Component
-This last component is a pure React component. The call component will contain three key components:
+## Add the Call Component
+This last component is a pure React component. The Call component will contain three key components:
 * Videos of all the participants
 * Channel name
 * End call button
 
-The channel name is simple a text at the top left of the screen and the call button is at the middle bottom of the screen. Whenever you click the button, it will take you back to the previous screen where you can join a different video call.
+The channel name is a simple text at the top left of the screen. The call button is at the bottom middle of the screen. Whenever you click the button, it returns you to the previous screen, where you can join a different video call.
 
-The interesting part is displaying the videos of all the participants. In order to do that we need to create an `AgoraRTCProvider`, which initializes and gives us access to the Agora RTC service. Inside this we can now display the video.
+The interesting part is displaying the videos of all the participants. In order to do that we need to create an `AgoraRTCProvider`, which initializes and gives us access to the Agora RTC service. Inside this we can now display the video:
 
 ### Videos
-The videos component is where all will be the part of the site that displays the videos of all the participants. There are many hooks used to set up the call:
-* useLocalMicrophoneTrack() retrieves the current user's microphone
-* useLocalCameraTrack() retrieves the current user's video input
-* useRemoteUsers() retrieves all the user information for the remote users
+The Videos component will be the part of the site that displays the videos of all the participants. Many hooks are used to set up the call:
+* useLocalMicrophoneTrack() retrieves the current user's microphone.
+* useLocalCameraTrack() retrieves the current user's video input.
+* useRemoteUsers() retrieves all the user information for the remote users.
 * useRemoteAudioTracks() retrieves the audio for those users.
-* usePublish() publishes the current user's video and audio
-* useJoin() joins the actual channel for the video call
+* usePublish() publishes the current user's video and audio.
+* useJoin() joins the channel for the video call.
 
 ```tsx
 const { AppID, channelName } = props;
@@ -186,13 +186,13 @@ useJoin({
 });
 ```
 
-Then we need to make sure all the audio for the remote users is started.
+Then we need to make sure all the audio for the remote users is started:
 
 ```tsx
 audioTracks.map((track) => track.play());
 ```
 
-And lastly we need to define our UI. First a loading state, while we wait for the local user's microphone and video to begin, and then a grid of all the users that are in the call.
+Finally, we need to define our UI: first a loading state, while we wait for the local user's microphone and video to begin, and then a grid of all the users who are in the call:
 
 ```tsx
 const deviceLoading = isLoadingMic || isLoadingCam;
@@ -249,6 +249,6 @@ With that, we have a complete video call experience. Here's how we built it:
 4. Redirect the site to a URL with the channel name.
 5. Display the channel name with a video call.
 
-The code for this project can be found [here](https://github.com/tadaspetra/astro-video-call). And you can find out more about Agora video calling [here](https://docs.agora.io/en/video-calling/get-started/get-started-uikit?platform=reactjs).
+The code for this project can be found [here](https://github.com/tadaspetra/astro-video-call). You can find out more about Agora video calling [here](https://docs.agora.io/en/video-calling/get-started/get-started-uikit?platform=reactjs).
 
 Thank you for reading!

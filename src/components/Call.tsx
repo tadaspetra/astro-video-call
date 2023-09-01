@@ -12,7 +12,7 @@ import {
 } from "agora-rtc-react";
 import AgoraRTC from "agora-rtc-sdk-ng";
 
-function App(props: { appId: string, channelName: string }) {
+function Call(props: { appId: string, channelName: string }) {
   const client = useRTCClient(AgoraRTC.createClient({ codec: "vp8", mode: "rtc" }));
 
   return (
@@ -81,4 +81,4 @@ function Videos(props: { channelName: string; AppID: string; }) {
 }
 
 
-export default App;
+export default Call;
