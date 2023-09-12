@@ -1,4 +1,6 @@
-# Build a Video Call with Astro
+# Build a Video Call App with Astro and ReactJS
+
+![Thumbnail](assets/AstroReactJS_title.webp)
 
 Astro is a framework that renders static HTML to your website with no JavaScript unless you explicitly ask for it-and it is gaining popularity fast. But can you add video calls to your Astro website?
 
