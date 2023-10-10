@@ -155,14 +155,25 @@ const { channelName } = Astro.params;
 ```
 
 ## Add the Call Component
-This last component is a pure React component. The Call component will contain three key components:
+The Call component will contain two key components:
 * Videos of all the participants
-* Channel name
 * End call button
 
-The channel name is a simple text at the top left of the screen. The call button is at the bottom middle of the screen. Whenever you click the button, it returns you to the previous screen, where you can join a different video call.
+The interesting part is displaying the videos of all the participants. In order to do that we need to create our Agora client and pass it to the `AgoraRTCProvider`, which initializes and gives us access to the Agora RTC service. Inside this we can now display the videos component and an end call button:
 
-The interesting part is displaying the videos of all the participants. In order to do that we need to create an `AgoraRTCProvider`, which initializes and gives us access to the Agora RTC service. Inside this we can now display the video:
+```tsx
+const client = useRTCClient(AgoraRTC.createClient({ codec: "vp8", mode: "rtc" }));
+
+  return (
+    <AgoraRTCProvider client={client}>
+      <Videos channelName={props.channelName} AppID={props.appId} />
+      <div className="fixed z-10 bottom-0 left-0 right-0 flex justify-center pb-4">
+        <a className="px-5 py-3 text-base font-medium text-center text-white bg-red-400 rounded-lg hover:bg-red-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 w-40" href="/">End Call</a>
+      </div>
+    </AgoraRTCProvider>
+  );
+}
+```
 
 ### Videos
 The Videos component will be the part of the site that displays the videos of all the participants. Many hooks are used to set up the call:
