@@ -1,5 +1,4 @@
 # Astro x Agora
-Simple Astro site implementing the [Agora UI Kit](https://docs.agora.io/en/video-calling/get-started/get-started-uikit?platform=web).
 
 ![Enter Channel](assets/landing.png)
 ![Video Call](assets/videocall.png)
